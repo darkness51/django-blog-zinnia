@@ -1,4 +1,5 @@
 """Test cases for Zinnia's feeds"""
+from urlparse import urljoin
 from datetime import datetime
 
 from django.test import TestCase
@@ -19,6 +20,7 @@ from zinnia.managers import PUBLISHED
 from zinnia.managers import PINGBACK, TRACKBACK
 from zinnia import feeds
 from zinnia.feeds import EntryFeed
+from zinnia.feeds import ZinniaFeed
 from zinnia.feeds import LatestEntries
 from zinnia.feeds import CategoryEntries
 from zinnia.feeds import AuthorEntries
@@ -28,6 +30,7 @@ from zinnia.feeds import EntryDiscussions
 from zinnia.feeds import EntryComments
 from zinnia.feeds import EntryPingbacks
 from zinnia.feeds import EntryTrackbacks
+from zinnia.feeds import LatestDiscussions
 
 
 class ZinniaFeedsTestCase(TestCase):
@@ -98,7 +101,7 @@ class ZinniaFeedsTestCase(TestCase):
         feed = EntryFeed()
         self.assertEquals(
             feed.item_enclosure_url(entry), 'http://example.com/image.jpg')
-        entry.content = 'My test content with image <img src="image.jpg" />',
+        entry.content = 'My test content with image <img src="image.jpg" />'
         entry.save()
         self.assertEquals(
             feed.item_enclosure_url(entry), 'http://example.com/image.jpg')
@@ -110,9 +113,20 @@ class ZinniaFeedsTestCase(TestCase):
         entry.image = 'image_field.jpg'
         entry.save()
         self.assertEquals(feed.item_enclosure_url(entry),
-                          'http://example.com/image_field.jpg')
+                          urljoin('http://example.com', entry.image.url))
         self.assertEquals(feed.item_enclosure_length(entry), '100000')
         self.assertEquals(feed.item_enclosure_mime_type(entry), 'image/jpeg')
+        feeds.FEEDS_FORMAT = original_feeds_format
+
+    def test_entry_feed_enclosure_issue_134(self):
+        original_feeds_format = feeds.FEEDS_FORMAT
+        feeds.FEEDS_FORMAT = ''
+        entry = self.create_published_entry()
+        feed = EntryFeed()
+        entry.content = 'My test content with image <img xsrc="image.jpg" />'
+        entry.save()
+        self.assertEquals(
+            feed.item_enclosure_url(entry), None)
         feeds.FEEDS_FORMAT = original_feeds_format
 
     def test_latest_entries(self):
@@ -120,8 +134,7 @@ class ZinniaFeedsTestCase(TestCase):
         feed = LatestEntries()
         self.assertEquals(feed.link(), '/')
         self.assertEquals(len(feed.items()), 1)
-        self.assertEquals(feed.title(),
-                          'example.com - %s' % _('Latest entries'))
+        self.assertEquals(feed.get_title(None), _('Latest entries'))
         self.assertEquals(
             feed.description(),
             _('The latest entries for the site %s') % 'example.com')
@@ -133,7 +146,7 @@ class ZinniaFeedsTestCase(TestCase):
         self.assertEquals(len(feed.items(self.category)), 1)
         self.assertEquals(feed.link(self.category), '/categories/tests/')
         self.assertEquals(
-            feed.title(self.category),
+            feed.get_title(self.category),
             _('Entries for the category %s') % self.category.title)
         self.assertEquals(
             feed.description(self.category),
@@ -145,7 +158,7 @@ class ZinniaFeedsTestCase(TestCase):
         self.assertEquals(feed.get_object('request', 'admin'), self.author)
         self.assertEquals(len(feed.items(self.author)), 1)
         self.assertEquals(feed.link(self.author), '/authors/admin/')
-        self.assertEquals(feed.title(self.author),
+        self.assertEquals(feed.get_title(self.author),
                           _('Entries for author %s') % self.author.username)
         self.assertEquals(feed.description(self.author),
                           _('The latest entries by %s') % self.author.username)
@@ -157,7 +170,7 @@ class ZinniaFeedsTestCase(TestCase):
         self.assertEquals(feed.get_object('request', 'tests').name, 'tests')
         self.assertEquals(len(feed.items('tests')), 1)
         self.assertEquals(feed.link(tag), '/tags/tests/')
-        self.assertEquals(feed.title(tag),
+        self.assertEquals(feed.get_title(tag),
                           _('Entries for the tag %s') % tag.name)
         self.assertEquals(feed.description(tag),
                           _('The latest entries for the tag %s') % tag.name)
@@ -173,11 +186,22 @@ class ZinniaFeedsTestCase(TestCase):
         self.assertEquals(feed.get_object(FakeRequest('test')), 'test')
         self.assertEquals(len(feed.items('test')), 1)
         self.assertEquals(feed.link('test'), '/search/?pattern=test')
-        self.assertEquals(feed.title('test'),
+        self.assertEquals(feed.get_title('test'),
                           _("Results of the search for '%s'") % 'test')
         self.assertEquals(
             feed.description('test'),
             _("The entries containing the pattern '%s'") % 'test')
+
+    def test_latest_discussions(self):
+        entry = self.create_published_entry()
+        self.create_discussions(entry)
+        feed = LatestDiscussions()
+        self.assertEquals(feed.link(), '/')
+        self.assertEquals(len(feed.items()), 3)
+        self.assertEquals(feed.get_title(None), _('Latest discussions'))
+        self.assertEquals(
+            feed.description(),
+            _('The latest discussions for the site %s') % 'example.com')
 
     def test_entry_discussions(self):
         entry = self.create_published_entry()
@@ -195,7 +219,7 @@ class ZinniaFeedsTestCase(TestCase):
         self.assertEquals(feed.item_author_email(comments[0]),
                           'admin@example.com')
         self.assertEquals(feed.item_author_link(comments[0]), '')
-        self.assertEquals(feed.title(entry),
+        self.assertEquals(feed.get_title(entry),
                           _('Discussions on %s') % entry.title)
         self.assertEquals(
             feed.description(entry),
@@ -208,7 +232,7 @@ class ZinniaFeedsTestCase(TestCase):
         self.assertEquals(list(feed.items(entry)), [comments[0]])
         self.assertEquals(feed.item_link(comments[0]),
                           '/comments/cr/%i/1/#comment_1' % self.entry_ct_id)
-        self.assertEquals(feed.title(entry),
+        self.assertEquals(feed.get_title(entry),
                           _('Comments on %s') % entry.title)
         self.assertEquals(
             feed.description(entry),
@@ -227,7 +251,7 @@ class ZinniaFeedsTestCase(TestCase):
         self.assertEquals(list(feed.items(entry)), [comments[1]])
         self.assertEquals(feed.item_link(comments[1]),
                           '/comments/cr/%i/1/#pingback_2' % self.entry_ct_id)
-        self.assertEquals(feed.title(entry),
+        self.assertEquals(feed.get_title(entry),
                           _('Pingbacks on %s') % entry.title)
         self.assertEquals(
             feed.description(entry),
@@ -240,7 +264,7 @@ class ZinniaFeedsTestCase(TestCase):
         self.assertEquals(list(feed.items(entry)), [comments[2]])
         self.assertEquals(feed.item_link(comments[2]),
                           '/comments/cr/%i/1/#trackback_3' % self.entry_ct_id)
-        self.assertEquals(feed.title(entry),
+        self.assertEquals(feed.get_title(entry),
                           _('Trackbacks on %s') % entry.title)
         self.assertEquals(
             feed.description(entry),
@@ -265,6 +289,12 @@ class ZinniaFeedsTestCase(TestCase):
         self.assertEquals(feed.feed_type, Atom1Feed)
         self.assertEquals(feed.subtitle, feed.description)
         feeds.FEEDS_FORMAT = original_feeds_format
+
+    def test_title_with_sitename_implementation(self):
+        feed = ZinniaFeed()
+        self.assertRaises(NotImplementedError, feed.title)
+        feed = LatestEntries()
+        self.assertEquals(feed.title(), 'example.com - ' + _('Latest entries'))
 
     def test_discussion_feed_with_same_slugs(self):
         """
