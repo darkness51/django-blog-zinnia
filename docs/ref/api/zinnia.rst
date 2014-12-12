@@ -11,6 +11,22 @@ Zinnia API
     :undoc-members:
     :show-inheritance:
 
+:mod:`breadcrumbs` Module
+-------------------------
+
+.. automodule:: zinnia.breadcrumbs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`calendar` Module
+----------------------
+
+.. automodule:: zinnia.calendar
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`comparison` Module
 ------------------------
 
@@ -35,6 +51,14 @@ Zinnia API
     :undoc-members:
     :show-inheritance:
 
+:mod:`flags` Module
+-------------------
+
+.. automodule:: zinnia.flags
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`managers` Module
 ----------------------
 
@@ -43,10 +67,10 @@ Zinnia API
     :undoc-members:
     :show-inheritance:
 
-:mod:`models` Module
---------------------
+:mod:`markups` Module
+----------------------
 
-.. automodule:: zinnia.models
+.. automodule:: zinnia.markups
     :members:
     :undoc-members:
     :show-inheritance:
@@ -63,6 +87,14 @@ Zinnia API
 ------------------
 
 .. automodule:: zinnia.ping
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`preview` Module
+---------------------
+
+.. automodule:: zinnia.preview
     :members:
     :undoc-members:
     :show-inheritance:
@@ -97,8 +129,9 @@ Subpackages
 .. toctree::
 
     zinnia.admin
+    zinnia.models
+    zinnia.models_bases
     zinnia.spam_checker
-    zinnia.templatetags
     zinnia.url_shortener
     zinnia.urls
     zinnia.views

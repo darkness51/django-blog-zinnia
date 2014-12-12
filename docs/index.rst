@@ -30,12 +30,14 @@ Topics
    topics/url_shortener
    topics/spam_checker
    topics/permissions
+   topics/ecosystem
 
 HOW-TOs
 --------
 
 .. toctree::
 
+   how-to/customize_look_and_feel
    how-to/extending_entry_model
    how-to/rewriting_entry_url
    how-to/import_export
@@ -73,8 +75,9 @@ Notes
 Related
 -------
 
-* `Zinnia's API`_
-* `Code coverage`_
+* `Build status`_
+* `Coverage report`_
+
 
 Indices and tables
 ------------------
@@ -85,6 +88,7 @@ index or try to find it using the search function:
 * :ref:`genindex`
 * :ref:`search`
 
-.. _`documentation online at readthedocs.org`: http://django-blog-zinnia.readthedocs.org/
-.. _`Zinnia's API`: http://django-blog-zinnia.com/api/
-.. _`Code coverage`: http://django-blog-zinnia.com/documentation/coverage/
+.. _`documentation online at readthedocs.org`: http://docs.django-blog-zinnia.com/
+.. _`Build status`: https://travis-ci.org/Fantomas42/django-blog-zinnia
+.. _`Coverage report`: https://coveralls.io/r/Fantomas42/django-blog-zinnia
+

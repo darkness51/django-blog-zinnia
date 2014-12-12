@@ -4,74 +4,9 @@ Frequently Asked Questions
 
 .. contents::
 
-.. _faq-templates:
+.. _faq-entries:
 
-Templates
-=========
-
-.. _customizing-templates:
-
-The templates does not fit to my wishes. What can I do ?
---------------------------------------------------------
-
-The templates provided for Zinnia are simple but complete and as generic as
-possible. But you can easily change them by
-`specifying a template directory`_. If you are not familiar with Django,
-the part two of the excellent Django tutorial explains in detail
-how to proceed for `customizing the look and feel`_ of the
-:mod:`~django.contrib.admin` app, in Zinnia it's the same thing.
-
-A good starting point is to copy-paste the :file:`zinnia/base.html` template,
-and edit the :ttag:`extends` instruction for fitting to your skin.
-
-.. note::
-	* The main content is displayed in block named ``content``.
-	* Additional datas are displayed in a block named ``sidebar``.
-
-You can also create your own app containing some Zinnia's templates based
-on inheritance. You can also create your own app containing some Zinnia’s
-templates based on inheritance. For example you can find these two
-applications which aim is to transform the templates for Zinnia to be HTML5
-ready, which can be a good starting point to make your own at :
-
-* `Zinnia-theme-html5`_.
-* `Django Blog Quintet`_.
-
-.. warning::
-   .. versionchanged:: 0.9
-
-   `Django Blog Quintet`_ is no longer compatible with Zinnia, but still be
-   a good example.
-
-.. _faq-comments:
-
-Comments
-========
-
-.. _customizing-comments:
-
-Is it possible have a different comment system, with reply feature for example ?
---------------------------------------------------------------------------------
-
-Yes the comment system integrated in Zinnia is based on
-:mod:`django.contrib.comments` and can be extended or replaced if doesn't
-quite fit your needs. You should take a look on the
-`customizing the comments framework`_ documentation for more information.
-
-.. warning::
-
-   The custom comment Model must be inherited from
-   :class:`~django.contrib.comments.models.Comment` and implement the
-   :class:`~django.contrib.comments.managers.CommentManager` to properly
-   work with Zinnia.
-
-
-If you want the ability to reply on comments, you can take a look at
-`django-threadcomments`_ for example.
-
-.. _faq-edition:
-
-Edition
+Entries
 =======
 
 .. _custom-markups:
@@ -85,10 +20,16 @@ entries in a custom markup language a solution is to disable the WYSIWYG
 editor in the admin site with the :setting:`ZINNIA_WYSIWYG` setting, and
 use the appropriate template filter in your templates.
 
-.. _faq-authors:
+I want to have multilingual support on the entries, is it possible ?
+--------------------------------------------------------------------
 
-Authors
-=======
+Due to the extending capabilities of Zinnia, many solutions on this
+problematic are possible, but you must keep in mind that multiplingual
+entries is just a concept, the needs and the implementations can differ
+from a project to another. But you should take a look on this excellent
+tutorial to `convert Zinnia into a multilingual Weblog`_ with
+`django-modeltranslation`_, which can be a good starting point for your
+needs.
 
 .. _multiple-authors:
 
@@ -121,7 +62,7 @@ How can I use the image field for fitting to my skin ?
 
 Take a looks at `sorl.thumbnail`_ and use his templatetags.
 
-You can do something like this in your templates :
+You can do something like this in your templates:
 
 .. code-block:: html+django
 
@@ -133,8 +74,8 @@ I want an image gallery in my posts, what can I do ?
 ----------------------------------------------------
 
 Simply create a new application with a model named :class:`EntryImage` with a
-:class:`~django.db.models.ForeignKey` to the :class:`~zinnia.models.Entry`
-model.
+:class:`~django.db.models.ForeignKey` to the
+:class:`~zinnia.models.entry.Entry` model.
 
 Then in the admin module of your app, unregister the
 :class:`~zinnia.admin.entry.EntryAdmin` class, and use
@@ -146,7 +87,7 @@ Here an simple example : ::
   from django.db import models
   from django.utils.translation import ugettext_lazy as _
 
-  from zinnia.models import Entry
+  from zinnia.models.entry import Entry
 
   class EntryImage(models.Model):
       """Image Model"""
@@ -163,8 +104,8 @@ Here an simple example : ::
 
   from django.contrib import admin
 
-  from zinnia.models import Entry
   from zinnia.admin import EntryAdmin
+  from zinnia.models.entry import Entry
   from gallery.models import EntryImage
 
   class EntryImageInline(admin.TabularInline):
@@ -176,17 +117,42 @@ Here an simple example : ::
   admin.site.unregister(Entry)
   admin.site.register(Entry, EntryAdminImage)
 
-Another and better solution is to extend the :class:`~zinnia.models.Entry`
+Another and better solution is to extend the :class:`~zinnia.models.entry.Entry`
 model like described in :doc:`/how-to/extending_entry_model`.
 
+.. _faq-comments:
 
-.. _`specifying a template directory`: https://docs.djangoproject.com/en/dev/ref/templates/api/#loading-templates
-.. _`customizing the look and feel`: https://docs.djangoproject.com/en/dev/intro/tutorial02/#customize-the-admin-look-and-feel
-.. _`customizing the comments framework`: https://docs.djangoproject.com/en/dev/ref/contrib/comments/custom/
-.. _`Zinnia-theme-html5`: https://github.com/Fantomas42/zinnia-theme-html5
-.. _`Django Blog Quintet`: https://github.com/franckbret/django-blog-quintet
-.. _`django-threadcomments`: https://github.com/HonzaKral/django-threadedcomments
+Comments
+========
+
+.. _customizing-comments:
+
+Is it possible have a different comment system, with reply feature for example ?
+--------------------------------------------------------------------------------
+
+Yes the comment system integrated in Zinnia is based on
+:mod:`django_comments` and can be extended or replaced if doesn't
+quite fit your needs. You should take a look on the
+`customizing the comments framework`_ documentation for more information.
+
+.. warning::
+
+   The custom comment Model must be inherited from
+   :class:`~django_comments.models.Comment` and implement the
+   :class:`~django_comments.managers.CommentManager` to properly
+   work with Zinnia.
+
+
+If you want the ability to reply on comments, you can take a look at
+`zinnia-threaded-comments`_ or at `django-threadcomments`_.
+
+
 .. _`MarkDown`: http://daringfireball.net/projects/markdown/
 .. _`Textile`: http://redcloth.org/hobix.com/textile/
 .. _`reStructuredText`: http://docutils.sourceforge.net/rst.html
+.. _`convert Zinnia into a multilingual Weblog`:  http://www.codeispoetry.me/django-blog-zinnia-multilanguage-support-with-django-modeltranslation/
+.. _`django-modeltranslation`:
 .. _`sorl.thumbnail`: http://thumbnail.sorl.net/
+.. _`customizing the comments framework`: http://django-contrib-comments.readthedocs.org/en/latest/custom.html
+.. _`zinnia-threaded-comments`: https://github.com/django-blog-zinnia/zinnia-threaded-comments
+.. _`django-threadcomments`: https://github.com/HonzaKral/django-threadedcomments

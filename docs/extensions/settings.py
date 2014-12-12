@@ -1,10 +1,7 @@
 """Settings for Zinnia documentation"""
-import os
 from zinnia.xmlrpc import ZINNIA_XMLRPC_METHODS
 
-HERE = os.path.abspath(os.path.dirname(__file__))
-
-DATABASES = {'default': {'NAME': os.path.join(HERE, 'docs.db'),
+DATABASES = {'default': {'NAME': ':memory:',
                          'ENGINE': 'django.db.backends.sqlite3'}}
 
 SITE_ID = 1
@@ -20,10 +17,11 @@ MOLLOM_PUBLIC_KEY = 'MOLLOM_PUBLIC_KEY'
 MOLLOM_PRIVATE_KEY = 'MOLLOM_PRIVATE_KEY'
 
 INSTALLED_APPS = [
+    'django.contrib.sites',
     'django.contrib.contenttypes',
-    'django.contrib.comments',
     'django.contrib.sessions',
     'django.contrib.admin',
     'django.contrib.auth',
+    'django_comments',
     'django_xmlrpc',
     'mptt', 'tagging', 'zinnia']
